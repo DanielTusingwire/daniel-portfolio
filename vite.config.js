@@ -3,12 +3,11 @@ import react from '@vitejs/plugin-react';
 import { createLogger, defineConfig } from 'vite';
 
 const isDev = process.env.NODE_ENV !== 'production';
-let inlineEditPlugin, editModeDevPlugin;
 
-if (isDev) {
-	inlineEditPlugin = (await import('./plugins/visual-editor/vite-plugin-react-inline-editor.js')).default;
-	editModeDevPlugin = (await import('./plugins/visual-editor/vite-plugin-edit-mode.js')).default;
-}
+// Remove the dynamic plugin import — it's not supported on Vercel builds
+const inlineEditPlugin = () => ({ name: 'noop-inline-edit-plugin' });
+const editModeDevPlugin = () => ({ name: 'noop-edit-mode-plugin' });
+
 
 const configHorizonsViteErrorHandler = `
 const observer = new MutationObserver((mutations) => {
@@ -193,7 +192,8 @@ export default defineConfig({
 	base: '/daniel-portfolio/',
 	customLogger: logger,
 	plugins: [
-		...(isDev ? [inlineEditPlugin(), editModeDevPlugin()] : []),
+		inlineEditPlugin(),
+		editModeDevPlugin(),
 		react(),
 		addTransformIndexHtml
 	],
